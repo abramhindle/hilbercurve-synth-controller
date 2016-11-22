@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <!--
+      (c) 2016 Mike Bostock
+
+      Licensed under the GPL3
+    -->
+  <head>
+    <script type="text/javascript" src="polymaps.js"></script>
+    <style type="text/css">
+
+@import url("polymaps.org.style.css")
+
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+
+hilbert = (function() {
+  // Adapted from Nick Johnson: http://bit.ly/biWkkq
+  var pairs = [
+    [[0, 3], [1, 0], [3, 1], [2, 0]],
+    [[2, 1], [1, 1], [3, 0], [0, 2]],
+    [[2, 2], [3, 3], [1, 2], [0, 1]],
+    [[0, 0], [3, 2], [1, 3], [2, 3]]
+  ];
+  return function(x, y, z) {
+    var quad = 0,
+        pair,
+        i = 0;
+    while (--z >= 0) {
+      pair = pairs[quad][(x & (1 << z) ? 2 : 0) | (y & (1 << z) ? 1 : 0)];
+      i = (i << 2) | pair[0];
+      quad = pair[1];
+    }
+    return i;
+  };
+})();
+
+var po = org.polymaps;
+
+var size = {x: 24, y: 24};
+
+var map = po.map()
+    .container(document.body.appendChild(po.svg("svg")))
+    .zoomRange([5, 13])
+    .zoom(6)
+    .center({lat: 0, lon: 0})
+    .tileSize(size);
+    //.add(po.interact());
+
+// duplicated code from polymap.js
+mydrag = function(whichButton) {
+  var drag = {},
+      map,
+      container,
+      dragging;
+
+  function mousedown(e) {
+    if (e.shiftKey) return;
+    if (e.button != whichButton) return;
+    dragging = {
+      x: e.clientX,
+      y: e.clientY
+    };
+    map.focusableParent().focus();
+    e.preventDefault();
+    document.body.style.setProperty("cursor", "move", null);
+  }
+
+  function mousemove(e) {
+    if (!dragging) return;
+    map.panBy({x: e.clientX - dragging.x, y: e.clientY - dragging.y});
+    dragging.x = e.clientX;
+    dragging.y = e.clientY;
+  }
+
+  function mouseup(e) {
+    if (!dragging) return;
+    mousemove(e);
+    dragging = null;
+    document.body.style.removeProperty("cursor");
+  }
+
+  drag.map = function(x) {
+    if (!arguments.length) return map;
+    if (map) {
+      container.removeEventListener("mousedown", mousedown, false);
+      container = null;
+    }
+    if (map = x) {
+      container = map.container();
+      container.addEventListener("mousedown", mousedown, false);
+    }
+    return drag;
+  };
+
+  window.addEventListener("mousemove", mousemove, false);
+  window.addEventListener("mouseup", mouseup, false);
+
+  return drag;
+};
+
+map.add(po.wheel());
+map.add(po.arrow());
+map.add(mydrag(2));
+map.add(mydrag(1));
+
+
+myselect = function(whichButton,locationListener) {
+  var drag = {},
+      map,
+      container,
+      dragging;
+    if (!locationListener) {
+        locationListener = function(loc) { console.log(loc); }
+    }
+
+  function mousedown(e) {
+    if (e.shiftKey) return;
+    if (e.button != whichButton) return;
+    dragging = {
+      x: e.clientX,
+      y: e.clientY
+    };
+    map.focusableParent().focus();
+    var location = map.pointLocation(map.mouse(e));
+    locationListener(location);  
+    e.preventDefault();
+    //document.body.style.setProperty("cursor", "move", null);
+  }
+
+  function mousemove(e) {
+    if (!dragging) return;
+    var location = map.pointLocation(map.mouse(e));
+    locationListener(location);  
+  }
+
+  function mouseup(e) {
+    if (!dragging) return;
+    mousemove(e);
+    dragging = null;
+    document.body.style.removeProperty("cursor");
+  }
+
+  drag.map = function(x) {
+    if (!arguments.length) return map;
+    if (map) {
+      container.removeEventListener("mousedown", mousedown, false);
+      container = null;
+    }
+    if (map = x) {
+      container = map.container();
+      container.addEventListener("mousedown", mousedown, false);
+    }
+    return drag;
+  };
+
+  window.addEventListener("mousemove", mousemove, false);
+  window.addEventListener("mouseup", mouseup, false);
+
+  return drag;
+};
+
+function locationListener(loc) {
+    console.log(loc);
+    req = new XMLHttpRequest();
+    req.open("GET", window.location.origin+"/location?x="+loc.lon+"&y="+loc.lat, true);
+    req.onreadystatechange = function(e) {
+        if (req.readyState == 4) {
+        }
+    };
+    req.send(null);
+}
+
+map.add(myselect(0,locationListener));
+
+
+
+
+
+document.body.getElementsByTagName("svg")[0].oncontextmenu = function (e) {
+    e.preventDefault();
+};
+map.add(po.layer(rainbow));
+
+map.add(po.compass()
+                .pan("none"));
+
+function rainbow(tile) {
+  var rect = tile.element = po.svg("rect"),
+      i = hilbert(tile.column, tile.row, tile.zoom),
+      j = ~~(i * 360 / Math.pow(4, tile.zoom)),
+      k = 1 << tile.zoom;
+  if (tile.column < 0 || tile.column >= k) return;
+  rect.setAttribute("width", size.x);
+  rect.setAttribute("height", size.y);
+               rect.setAttribute("fill", hsl(j, i, 0.1 + .25*i%13/13.0));
+}
+
+function hsl(h, s, l) {
+  var m1,
+      m2;
+
+  /* Some simple corrections for h, s and l. */
+  h = h % 360; if (h < 0) h += 360;
+  s = s < 0 ? 0 : s > 1 ? 1 : s;
+  l = l < 0 ? 0 : l > 1 ? 1 : l;
+
+  /* From FvD 13.37, CSS Color Module Level 3 */
+  m2 = l <= .5 ? l * (1 + s) : l + s - l * s;
+  m1 = 2 * l - m2;
+
+  function v(h) {
+    if (h > 360) h -= 360;
+    else if (h < 0) h += 360;
+    if (h < 60) return m1 + (m2 - m1) * h / 60;
+    if (h < 180) return m2;
+    if (h < 240) return m1 + (m2 - m1) * (240 - h) / 60;
+    return m1;
+  }
+
+  function vv(h) {
+    return Math.round(v(h) * 255);
+  }
+
+  return "rgb(" + vv(h + 120) + "," + vv(h) + "," + vv(h - 120) + ")";
+}
+
+    </script>
+  </body>
+</html>
