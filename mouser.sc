@@ -38,16 +38,16 @@ SynthDef(\noiser,{arg out=0,lpf=0.0,shift=0.0,pitchdisp=0.0,timedisp=0.0,pink=0.
 	);
 }).add;
 
-x = Synth(\noiser);
+q = Synth(\noiser);
 OSCFunc.newMatching({|msg|
-	x.set(\lpf,msg[1]);
-	x.set(\shift,msg[2]);
-	x.set(\pitchdisp,msg[3]);
-	x.set(\timedisp,msg[4]);
-	x.set(\white,msg[5]);//(msg[5]>0.5).asInteger);
-	x.set(\pink ,msg[6]);//(msg[6]>0.5).asInteger);
-	x.set(\brown,msg[7]);//(msg[7]>0.5).asInteger);
-	x.set(\rq,msg[8]);
+	q.set(\lpf,msg[1]);
+	q.set(\shift,msg[2]);
+	q.set(\pitchdisp,msg[3]);
+	q.set(\timedisp,msg[4]);
+	q.set(\white,msg[5]);//(msg[5]>0.5).asInteger);
+	q.set(\pink ,msg[6]);//(msg[6]>0.5).asInteger);
+	q.set(\brown,msg[7]);//(msg[7]>0.5).asInteger);
+	q.set(\rq,msg[8]);
 }, '/mouse');
 
 
@@ -85,15 +85,14 @@ SynthDef(\rsiner,{arg out=0,osc1=0.0,osc2=0.0,osc3=0.0,osc4=0.0;
 		,LinExp(osc4,0,1.0,0.01,1.0)
 	);
 }).add;
-y = Synth(\rsiner);
+z = Synth(\rsiner);
 OSCFunc.newMatching({|msg|
 	msg.postln;
-	y.set(\osc1,msg[1]);
-	y.set(\osc2,msg[2]);
-	y.set(\osc3,msg[3]);
-	y.set(\osc4,msg[4]);
+	z.set(\osc1,msg[1]);
+	z.set(\osc2,msg[2]);
+	z.set(\osc3,msg[3]);
+	z.set(\osc4,msg[4]);
 }, '/mouse');
-y.set(\osc1,0.9);
 
 
 
@@ -115,19 +114,19 @@ SynthDef("blipsaw",
 		)
 	}
 ).load(s);
-y = Synth(\blipsaw);
+u = Synth(\blipsaw);
 OSCFunc.newMatching({|msg|
 	msg.postln;
-	y.set(\freq,msg[1]);
-	y.set(\fadd,msg[2]);
-	y.set(\ffreq,msg[3]);
-	y.set(\ffmul,msg[4]);
-	y.set(\ffadd,msg[5]);
-	y.set(\harmfreq,msg[6]);
-	y.set(\hmul,msg[7]);
-	y.set(\amp,msg[8]);
-	y.set(\delaytime,msg[9]);
-	y.set(\decaytime,msg[10]);
+	u.set(\freq,msg[1]);
+	u.set(\fadd,msg[2]);
+	u.set(\ffreq,msg[3]);
+	u.set(\ffmul,msg[4]);
+	u.set(\ffadd,msg[5]);
+	u.set(\harmfreq,msg[6]);
+	u.set(\hmul,msg[7]);
+	u.set(\amp,msg[8]);
+	u.set(\delaytime,msg[9]);
+	u.set(\decaytime,msg[10]);
 }, '/mouse');
 
 
@@ -155,13 +154,13 @@ SynthDef(\hydro4, {
 			,Lag.kr(rq,0.1))
 	)
 }).add;
-y = Synth(\hydro4);
+v = Synth(\hydro4);
 OSCFunc.newMatching({|msg|
 	msg.postln;
-	y.set(\rq,msg[6].linlin(0,1.0,0.0,1.0));
-	y.set(\lpf,msg[5].linlin(0,1,10,125).midicps);
-	y.set(\freq1,msg[4].linlin(0,1,20,70).midicps);
-	y.set(\freq2,msg[2].linlin(0,1,30,90).midicps);
-	y.set(\freq3,msg[3].linlin(0,1,50,110).midicps);
-	y.set(\amp,(msg[1]>0.25).asInteger * msg[4] - 0.25);
+	v.set(\rq,msg[6].linlin(0,1.0,0.0,1.0));
+	v.set(\lpf,msg[5].linlin(0,1,10,125).midicps);
+	v.set(\freq1,msg[4].linlin(0,1,20,70).midicps);
+	v.set(\freq2,msg[2].linlin(0,1,30,90).midicps);
+	v.set(\freq3,msg[3].linlin(0,1,50,110).midicps);
+	v.set(\amp,(msg[1]>0.25).asInteger * msg[4] - 0.25);
 }, '/mouse');
