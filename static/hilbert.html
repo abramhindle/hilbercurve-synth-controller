@@ -11,7 +11,8 @@
 
 @import url("polymaps.org.style.css")
 
-    </style>
+</style>
+    <link  rel="stylesheet"  href="mycss.css" type="text/css"/>
   </head>
   <body>
     <script type="text/javascript">
@@ -125,7 +126,7 @@ myselect = function(whichButton,locationListener) {
     };
     map.focusableParent().focus();
     var location = map.pointLocation(map.mouse(e));
-    locationListener(location);  
+    locationListener(location,map.mouse(e));  
     e.preventDefault();
     //document.body.style.setProperty("cursor", "move", null);
   }
@@ -133,7 +134,7 @@ myselect = function(whichButton,locationListener) {
   function mousemove(e) {
     if (!dragging) return;
     var location = map.pointLocation(map.mouse(e));
-    locationListener(location);  
+    locationListener(location,map.mouse(e));  
   }
 
   function mouseup(e) {
@@ -162,8 +163,7 @@ myselect = function(whichButton,locationListener) {
   return drag;
 };
 
-function locationListener(loc) {
-    console.log(loc);
+function sendLocation(loc) {
     req = new XMLHttpRequest();
     req.open("GET", window.location.origin+"/location?x="+loc.lon+"&y="+loc.lat, true);
     req.onreadystatechange = function(e) {
@@ -171,6 +171,46 @@ function locationListener(loc) {
         }
     };
     req.send(null);
+}
+
+var myCursors = [];
+function getCursor() {
+    if (myCursor) {
+        return myCursor;
+    }
+    return getCursor();
+}
+function mkCursor() {
+    var mySVG = document.body.getElementsByTagName("svg")[0];
+    var myCursor = po.svg("circle");
+    myCursor.setAttribute("cx",0.0);
+    myCursor.setAttribute("cy",0.0);
+    myCursor.setAttribute("r", 50);//Math.pow(2, map.zoom() - 11));
+    mySVG.appendChild(myCursor);
+    return myCursor;
+}
+var lr = 0;
+var lg = 0;
+var lb = 0;
+function locationListener(loc,mouse) {
+    console.log(loc);
+    sendLocation(loc);
+    console.log(mouse);
+    var cursor = mkCursor();
+    cursor.setAttribute("cx",mouse.x);
+    cursor.setAttribute("cy",mouse.y);
+    cursor.setAttribute("r", 3);
+    lr+=3;
+    lg+=7;
+    lb+=4;
+    cursor.style.fill = 'rgb('+(lr%255)+','+(lg%255)+','+(lb%255)+')';
+    cursor.style.stroke = cursor.style.fill;
+    myCursors.push(cursor);
+    if (myCursors.length > 100) {
+        var rmCursor = myCursors.shift();
+        var mySVG = document.body.getElementsByTagName("svg")[0];
+        mySVG.removeChild(rmCursor);
+    }
 }
 
 map.add(myselect(0,locationListener));

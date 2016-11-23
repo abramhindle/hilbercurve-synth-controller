@@ -13,7 +13,7 @@ def parse_args():
                     help='oscport')
     parser.add_argument('--host', default="127.0.0.1", 
                     help='oschost')
-    parser.add_argument('--dims', default=2, type=int,
+    parser.add_argument('--dims', default=10, type=int,
                     help='dims')
     parser.add_argument('--bits', default=10, type=int,
                     help='bits')
@@ -32,12 +32,18 @@ def location():
     x = int(screen_max * (x + 180.0) / 360.0)
     y = int(screen_max * (y + 85.0) / (2*85.0))
     h = hilbert.distance_from_coordinates([x,y], 11, 2) # 2048x2048
-    new_h = dim_max * h / total_screen_max
-    new_x = hilbert.coordinates_from_distance(new_h, p, N)
-    print(new_x)
-    new_xf = map(lambda x: x/fp,new_x)
-    liblo.send(target, "/mouse",*new_xf)
+    for i in range(1,N+1):
+        dim_max = 2**(i*p)
+        new_h = dim_max * h / total_screen_max
+        new_x = hilbert.coordinates_from_distance(new_h, p, i)
+        print(new_x)
+        new_xf = map(lambda x: x/fp,new_x)
+        liblo.send(target, "/mouse"+str(i),*new_xf)
     return ('', 204)
+
+@app.route('/', methods=['GET','POST'])
+def root():
+    return redirect("/static/hilbert.html",code=302)
 
 if __name__ == "__main__":
     args = parse_args()

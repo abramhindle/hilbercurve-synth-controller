@@ -18,7 +18,7 @@ OSCFunc.newMatching({|msg|
 	x.set(\shift,msg[2]);
 	x.set(\pitchdisp,msg[3]);
 	x.set(\timedisp,msg[4]);
-}, '/mouse');
+}, '/mouse4');
 
 
 SynthDef(\noiser,{arg out=0,lpf=0.0,shift=0.0,pitchdisp=0.0,timedisp=0.0,pink=0.0,white=0.0,brown=0.0,rq=0.5;
@@ -48,7 +48,7 @@ OSCFunc.newMatching({|msg|
 	q.set(\pink ,msg[6]);//(msg[6]>0.5).asInteger);
 	q.set(\brown,msg[7]);//(msg[7]>0.5).asInteger);
 	q.set(\rq,msg[8]);
-}, '/mouse');
+}, '/mouse8');
 
 
 
@@ -71,8 +71,7 @@ OSCFunc.newMatching({|msg|
 	y.set(\osc2,msg[2]);
 	y.set(\osc3,msg[3]);
 	y.set(\osc4,msg[4]);
-}, '/mouse');
-y.set(\osc1,0.9);
+}, '/mouse4');
 
 
 
@@ -92,7 +91,7 @@ OSCFunc.newMatching({|msg|
 	z.set(\osc2,msg[2]);
 	z.set(\osc3,msg[3]);
 	z.set(\osc4,msg[4]);
-}, '/mouse');
+}, '/mouse4');
 
 
 
@@ -127,11 +126,11 @@ OSCFunc.newMatching({|msg|
 	u.set(\amp,msg[8]);
 	u.set(\delaytime,msg[9]);
 	u.set(\decaytime,msg[10]);
-}, '/mouse');
+}, '/mouse10');
 
 
 SynthDef(\hydro1, {
-	arg out=0,freq=440
+	arg out=0,freq=440;
 	var n = (2..10);
 	Out.ar(0,
 		(n.collect {arg i; SinOsc.ar( (1 - (1/(i*i))) * freq )}).sum
@@ -163,4 +162,4 @@ OSCFunc.newMatching({|msg|
 	v.set(\freq2,msg[2].linlin(0,1,30,90).midicps);
 	v.set(\freq3,msg[3].linlin(0,1,50,110).midicps);
 	v.set(\amp,(msg[1]>0.25).asInteger * msg[4] - 0.25);
-}, '/mouse');
+}, '/mouse6');
