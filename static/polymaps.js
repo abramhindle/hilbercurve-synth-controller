@@ -2,7 +2,7 @@ if (!org) var org = {};
 if (!org.polymaps) org.polymaps = {};
 (function(po){
 
-  po.version = "2.5.1"; // semver.org
+  po.version = "2.5.2"; // semver.org
 
   var zero = {x: 0, y: 0};
 po.ns = {
@@ -499,23 +499,24 @@ po.map = function() {
   };
 
   map.mouse = function(e) {
-    var point = (container.ownerSVGElement || container).createSVGPoint();
-    if ((bug44083 < 0) && (window.scrollX || window.scrollY)) {
-      var svg = document.body.appendChild(po.svg("svg"));
-      svg.style.position = "absolute";
-      svg.style.top = svg.style.left = "0px";
-      var ctm = svg.getScreenCTM();
-      bug44083 = !(ctm.f || ctm.e);
-      document.body.removeChild(svg);
-    }
-    if (bug44083) {
-      point.x = e.pageX;
-      point.y = e.pageY;
-    } else {
+    //IE doesn't have parent element attached to top level svg element,
+    //so we have to use this hack, but only for IE since it wont work
+    // correctly on some other browsers (firefox).
+    if (!container.parentElement) {
+      var point = (container.ownerSVGElement || container).createSVGPoint();
       point.x = e.clientX;
       point.y = e.clientY;
+      return point.matrixTransform(container.getScreenCTM().inverse());
     }
-    return point.matrixTransform(container.getScreenCTM().inverse());
+    //Firefox (as of version 28) calculates bounding boxes for
+    //svg elements wrong when css transformation are present.
+    //Calculating works however for normal html elements, thus
+    //use the parent div for calculation.
+    var rect = container.parentElement.getBoundingClientRect();
+    return {
+      x: e.clientX - rect.left - container.clientLeft,
+      y: e.clientY - rect.top - container.clientTop
+    };
   };
 
   map.size = function(x) {
@@ -714,11 +715,7 @@ po.map.coordinateLocation = function(c) {
     lon: k * c.column - 180,
     lat: y2lat(180 - k * c.row)
   };
-};
-
-// https://bugs.webkit.org/show_bug.cgi?id=44083
-var bug44083 = /WebKit/.test(navigator.userAgent) ? -1 : 0;
-po.layer = function(load, unload) {
+};po.layer = function(load, unload) {
   var layer = {},
       cache = layer.cache = po.cache(load, unload).size(512),
       tile = true,
@@ -789,24 +786,29 @@ po.layer = function(load, unload) {
       }
     }
 
-    // set the layer transform
-    container.setAttribute("transform",
-        "translate(" + (mapSize.x / 2) + "," + (mapSize.y / 2) + ")"
-        + (mapAngle ? "rotate(" + mapAngle / Math.PI * 180 + ")" : "")
-        + (mapZoomFraction ? "scale(" + Math.pow(2, mapZoomFraction) + ")" : "")
-        + (transform ? transform.zoomFraction(mapZoomFraction) : ""));
-
     // get the coordinates of the four corners
     var c0 = map.pointCoordinate(tileCenter, zero),
         c1 = map.pointCoordinate(tileCenter, {x: mapSize.x, y: 0}),
         c2 = map.pointCoordinate(tileCenter, mapSize),
         c3 = map.pointCoordinate(tileCenter, {x: 0, y: mapSize.y});
 
-    // round to pixel boundary to avoid anti-aliasing artifacts
-    if (!mapZoomFraction && !mapAngle && !transform) {
-      tileCenter.column = (Math.round(tileSize.x * tileCenter.column) + (mapSize.x & 1) / 2) / tileSize.x;
-      tileCenter.row = (Math.round(tileSize.y * tileCenter.row) + (mapSize.y & 1) / 2) / tileSize.y;
-    }
+    var col = tileCenter.column, row = tileCenter.row;
+    tileCenter.column = Math.round((Math.round(tileSize.x * tileCenter.column) + (mapSize.x & 1) / 2) / tileSize.x);
+    tileCenter.row = Math.round((Math.round(tileSize.y * tileCenter.row) + (mapSize.y & 1) / 2) / tileSize.y);
+    col -= tileCenter.column;
+    row -= tileCenter.row;
+
+    // set the layer transform
+    var roundedZoomFraction = roundZoom(Math.pow(2, mapZoomFraction));
+    container.setAttribute("transform",
+        "translate("
+          + Math.round(mapSize.x / 2 - col * tileSize.x * roundedZoomFraction)
+          + ","
+          + Math.round(mapSize.y / 2 - row * tileSize.y * roundedZoomFraction)
+        + ")"
+        + (mapAngle ? "rotate(" + mapAngle / Math.PI * 180 + ")" : "")
+        + (mapZoomFraction ? "scale(" + roundedZoomFraction + ")" : "")
+        + (transform ? transform.zoomFraction(mapZoomFraction) : ""));
 
     // layer-specific coordinate transform
     if (transform) {
@@ -926,13 +928,17 @@ po.layer = function(load, unload) {
       }
     }
 
+    function roundZoom(z) {
+      return Math.round(z * 256) / 256;
+    }
+
     // position tiles
     for (var key in newLocks) {
       var t = newLocks[key],
-          k = Math.pow(2, t.level = t.zoom - tileCenter.zoom);
+          k = roundZoom(Math.pow(2, t.level = t.zoom - tileCenter.zoom));
       t.element.setAttribute("transform", "translate("
-        + (t.x = tileSize.x * (t.column - tileCenter.column * k)) + ","
-        + (t.y = tileSize.y * (t.row - tileCenter.row * k)) + ")");
+        + Math.round(t.x = tileSize.x * (t.column - tileCenter.column * k)) + ","
+        + Math.round(t.y = tileSize.y * (t.row - tileCenter.row * k)) + ")");
     }
 
     // remove tiles that are no longer visible
@@ -1321,7 +1327,7 @@ po.geoJson = function(fetch) {
     MultiPoint: function (o, e, k) {
       var c = o.coordinates,
           i = -1,
-          n = p.length,
+          n = c.length,
           x = e.firstChild,
           p;
       while (++i < n) {
@@ -2402,3 +2408,5 @@ po.stylist = function() {
   return stylist;
 };
 })(org.polymaps);
+
+module.exports = org.polymaps;
