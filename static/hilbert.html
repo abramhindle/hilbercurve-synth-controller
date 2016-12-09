@@ -9,7 +9,7 @@
     <script type="text/javascript" src="polymaps.js"></script>
     <style type="text/css">
 
-@import url("polymaps.org.style.css")
+@import url("polymaps.org.style.css");
 
 </style>
     <link  rel="stylesheet"  href="mycss.css" type="text/css"/>
@@ -200,6 +200,8 @@ function locationListener(loc,mouse) {
     cursor.setAttribute("cx",mouse.x);
     cursor.setAttribute("cy",mouse.y);
     cursor.setAttribute("r", 3);
+    cursor.loc = loc;
+
     lr+=3;
     lg+=7;
     lb+=4;
@@ -213,6 +215,11 @@ function locationListener(loc,mouse) {
     }
 }
 
+function getNthMyCursor(i) {
+    if (i > myCursors.length) { return null; }
+    return myCursors[myCursors.length - 1 - i];
+}
+
 map.add(myselect(0,locationListener));
 
 
@@ -222,7 +229,46 @@ map.add(myselect(0,locationListener));
 document.body.getElementsByTagName("svg")[0].oncontextmenu = function (e) {
     e.preventDefault();
 };
-map.add(po.layer(rainbow));
+
+document.body.addEventListener("keydown", function (e) {
+    // 49 to 57,48
+    var i = 0;
+    if (e.keyCode >= 48 && e.keyCode <= 57) {
+        if (e.keyCode == 48) {
+            i = 9;
+        } else {
+            i = e.keyCode - 49;
+        }
+        var cursor = getNthMyCursor(i);
+        if (cursor!=null) {
+            console.log(cursor.loc);
+            sendLocation(cursor.loc);
+        }
+    }
+    //e.preventDefault();
+},false);
+var layer = po.layer(rainbow);
+map.add(layer);
+
+/*
+function urlmapper(uri) {
+    console.log("making urlmapper");
+    return function(c) {
+        //console.log("urlmapper");
+        //console.log(c);
+        return uri;//+"?"+c;
+    };
+}
+function testLoad(e) {
+    console.log("testLoad");
+    console.log(e);
+}
+map.add(po.geoJson()
+        .url(urlmapper("empty.json"))
+        .on("load", testLoad)
+        .clip(false)
+        .zoom(12));
+*/
 
 map.add(po.compass()
                 .pan("none"));

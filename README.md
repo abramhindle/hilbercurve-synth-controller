@@ -10,3 +10,16 @@ A python based OSC example of mapping a 2D hilbert curve into an N-D Hilbert cur
 * static/hilbert.html hilbert map HTML
 * static/LICENSE license of hilbert map and polymap.js
 * static/polymaps.js the library we use
+
+Controls
+========
+
+* Arrow keys move the map around.
+* 1-9,0 replay the last clicks
+
+
+ToDos
+=====
+
+* [X] 1,2,3,4 -> last clicked sounds
+* [ ] Insert items on the map itself.

@@ -11,7 +11,6 @@ SynthDef(\pinknoiser,{arg out=0,lpf=0.0,shift=0.0,pitchdisp=0.0,timedisp=0.0;
 		)!2
 	);
 }).add;
-
 x = Synth(\pinknoiser);
 OSCFunc.newMatching({|msg|
 	x.set(\lpf,msg[1]);
@@ -154,6 +153,7 @@ SynthDef(\hydro4, {
 	)
 }).add;
 v = Synth(\hydro4);
+//v.free;
 OSCFunc.newMatching({|msg|
 	msg.postln;
 	v.set(\rq,msg[6].linlin(0,1.0,0.0,1.0));
@@ -163,3 +163,28 @@ OSCFunc.newMatching({|msg|
 	v.set(\freq3,msg[3].linlin(0,1,50,110).midicps);
 	v.set(\amp,(msg[1]>0.25).asInteger * msg[4] - 0.25);
 }, '/mouse6');
+
+SynthDef(\bubbles, { 
+	arg out=0, sawfreq=0.4, sawmul=24.0, sawfreq2=8.0, 
+	    sawfreq3=7.23, sawmul2=3, sawadd2=80, sinemul=0.04,
+	    decaytime=0.2, combmul = -4, amp=0.3;
+    var f, zout;
+    f = LFSaw.kr(sawfreq, 0, sawmul, LFSaw.kr([sawfreq2,sawfreq3], 0, sawmul2, sawadd2)).midicps;
+    zout = CombN.ar(SinOsc.ar(f, 0, sinemul), 1.0, decaytime, combmul); // echoing sine wave
+    Out.ar(out, (zout *amp)!2);
+}).load(s);
+q = Synth(\bubbles);
+//q.free;
+OSCFunc.newMatching({|msg|
+	msg.postln;
+	q.set(\sawfreq,  msg[10].linlin(0,1.0,0.01,3.0));
+	q.set(\sawmul,   msg[2].linlin(0,1.0,10,96.0));
+	q.set(\sawfreq2, msg[3].linlin(0,1.0,0.01,32.0));
+	q.set(\sawfreq3, msg[4].linlin(0,1.0,0.01,16.0));
+	q.set(\sawmul2,  msg[5].linlin(0,1.0,0.01,5.0));
+	q.set(\sawadd2,  msg[6].linlin(0,1.0,10,160));
+	q.set(\sinemul,  msg[7].linlin(0,1.0,0.001,0.2));
+	q.set(\decaytime,  msg[8].linlin(0,1.0,0.05,0.6));
+	q.set(\combmul,  msg[9].linlin(0,1.0,-8.0,8.0));
+	q.set(\amp,  msg[1].linlin(0,1.0,0.0,1.0));
+}, '/mouse10');
