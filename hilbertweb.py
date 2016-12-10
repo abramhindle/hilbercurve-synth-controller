@@ -41,6 +41,11 @@ def location():
         liblo.send(target, "/mouse"+str(i),*new_xf)
     return ('', 204)
 
+@app.route('/toggle/<togglename>', methods=['GET','POST'])
+def toggle(togglename):
+    liblo.send(target, "/toggle/"+str(togglename),0)
+    return ('', 204)
+
 @app.route('/', methods=['GET','POST'])
 def root():
     return redirect("/static/hilbert.html",code=302)
