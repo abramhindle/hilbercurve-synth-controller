@@ -2,3 +2,7 @@ circle {
     stroke: brown;
     fill: lightcoral;
 }
+body {
+    background: url('background.jpg');
+    background-color: black;
+}

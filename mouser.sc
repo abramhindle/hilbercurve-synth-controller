@@ -30,6 +30,7 @@ s.waitForBoot {
 	}).add;
 	SynthDef(\noiser,{arg out=0,lpf=0.0,shift=0.0,pitchdisp=0.0,timedisp=0.0,pink=0.0,white=0.0,brown=0.0,rq=0.5;
 		Out.ar(out,
+			Clip.ar(
 			4.0*
 			PitchShift.ar(		
 				RLPF.ar(
@@ -42,6 +43,7 @@ s.waitForBoot {
 				pitchdisp, 				// pitch dispersion
 				LinExp.kr(timedisp,0,1,0.001,0.1)	// time dispersion
 			)!2
+			,-0.9,0.9)
 		);
 	}).add;
 	SynthDef(\lsiner,{arg out=0,osc1=0.0,osc2=0.0,osc3=0.0,osc4=0.0;

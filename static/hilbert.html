@@ -210,7 +210,7 @@ function locationListener(loc,mouse) {
     var cursor = mkCursor();
     cursor.setAttribute("cx",mouse.x);
     cursor.setAttribute("cy",mouse.y);
-    cursor.setAttribute("r", 3);
+    cursor.setAttribute("r", 10);
     cursor.loc = loc;
 
     lr+=3;
@@ -304,7 +304,7 @@ function rainbow(tile) {
   if (tile.column < 0 || tile.column >= k) return;
   rect.setAttribute("width", size.x);
   rect.setAttribute("height", size.y);
-               rect.setAttribute("fill", hsl(j, i, 0.1 + .25*i%13/13.0));
+               rect.setAttribute("fill", hsl(j, i, 0.01 + .25*i%13/13.0));
 }
 
 function hsl(h, s, l) {
