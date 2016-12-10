@@ -173,6 +173,17 @@ function sendLocation(loc) {
     req.send(null);
 }
 
+function sendToggle(toggle) {
+    req = new XMLHttpRequest();
+    req.open("GET", window.location.origin+"/toggle/"+toggle, true);
+    req.onreadystatechange = function(e) {
+        if (req.readyState == 4) {
+        }
+    };
+    req.send(null);
+}
+
+
 var myCursors = [];
 function getCursor() {
     if (myCursor) {
@@ -233,6 +244,15 @@ document.body.getElementsByTagName("svg")[0].oncontextmenu = function (e) {
 document.body.addEventListener("keydown", function (e) {
     // 49 to 57,48
     var i = 0;
+    var toggles = {
+        90:"pinknoiser",
+        88:"noiser",
+        67:"lsiner",
+        86:"rsiner",
+        66:"blipsaw", //b
+        78:"hydro4", //n
+        77:"bubbles", //m
+    };
     if (e.keyCode >= 48 && e.keyCode <= 57) {
         if (e.keyCode == 48) {
             i = 9;
@@ -244,6 +264,9 @@ document.body.addEventListener("keydown", function (e) {
             console.log(cursor.loc);
             sendLocation(cursor.loc);
         }
+    } else if (toggles[e.keyCode]!=undefined) {
+        console.log("Sending toggle: " + toggles[e.keyCode]);
+        sendToggle(toggles[e.keyCode]);
     }
     //e.preventDefault();
 },false);

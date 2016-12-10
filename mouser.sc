@@ -56,10 +56,13 @@ s.waitForBoot {
 	}).add;
 	SynthDef(\rsiner,{arg out=0,osc1=0.0,osc2=0.0,osc3=0.0,osc4=0.0;
 		Out.ar(out,
-			RLPF.ar(SinOsc.ar(LinExp.kr(osc1,0,1.0,40,200)) + 
-				SinOsc.ar(LinExp.kr(osc3,0,1.0,120,280))) / 3.0
-			,LinLin(osc3,0,1.0,40,280)
-			,LinExp(osc4,0,1.0,0.01,1.0)
+			Clip.ar(
+				RLPF.ar((SinOsc.ar(LinExp.kr(osc1,0,1.0,40,200)) + 
+					SinOsc.ar(LinExp.kr(osc3,0,1.0,120,280))) / 3.0
+					,LinLin.kr(osc3,0,1.0,40,280)
+					,LinExp.kr(osc4,0,1.0,0.01,1.0)
+				),
+				-0.9,0.9)
 		);
 	}).add;
 	SynthDef("blipsaw",
@@ -190,43 +193,43 @@ s.waitForBoot {
 	OSCFunc.newMatching({|msg|
 		if(x.isNil,{
 			x = Synth(\pinknoiser);
-		},{ x.free; }
+		},{ x.free; x = nil;}
 		);
 	},"/toggle/pinknoiser");
 	OSCFunc.newMatching({|msg|
 		if(q.isNil,{
 			q = Synth(\noiser);
-		},{ q.free; }
+		},{ q.free; q = nil;}
 		);
 	},"/toggle/noiser");
 	OSCFunc.newMatching({|msg|
 		if(y.isNil,{
 			y = Synth(\lsiner);
-		},{ y.free; }
+		},{ y.free; y = nil;}
 		);
 	},"/toggle/lsiner");
 	OSCFunc.newMatching({|msg|
 		if(z.isNil,{
 			z = Synth(\rsiner);
-		},{ z.free; }
+		},{ z.free; z = nil;}
 		);
 	},"/toggle/rsiner");
 	OSCFunc.newMatching({|msg|
 		if(u.isNil,{
 			u = Synth(\blipsaw);
-		},{ u.free; }
+		},{ u.free; u = nil;}
 		);
 	},"/toggle/blipsaw");
 	OSCFunc.newMatching({|msg|
 		if(v.isNil,{
 			v = Synth(\hydro4);
-		},{ v.free; }
+		},{ v.free; v = nil;}
 		);
 	},"/toggle/hydro4");
 	OSCFunc.newMatching({|msg|
 		if(r.isNil,{
 			r = Synth(\bubbles);
-		},{ r.free; }
+		},{ r.free; r = nil;}
 		);
 	},"/toggle/bubbles");
 	
