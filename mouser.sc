@@ -1,5 +1,21 @@
 s.boot;
+
+x = nil;
+q = nil;
+y = nil;
+z = nil;
+u = nil;
+v = nil;
+r = nil;
+
 s.waitForBoot {
+	x = nil;
+	q = nil;
+	y = nil;
+	z = nil;
+	u = nil;
+	v = nil;
+	r = nil;
 	SynthDef(\pinknoiser,{arg out=0,lpf=0.0,shift=0.0,pitchdisp=0.0,timedisp=0.0;
 		Out.ar(out,
 			4.0*
@@ -171,15 +187,51 @@ s.waitForBoot {
 		r.set(\combmul,  msg[9].linlin(0,1.0,-8.0,8.0));
 		r.set(\amp,  msg[1].linlin(0,1.0,0.0,1.0));
 	}, '/mouse10');
+	OSCFunc.newMatching({|msg|
+		if(x.isNil,{
+			x = Synth(\pinknoiser);
+		},{ x.free; }
+		);
+	},"/toggle/pinknoiser");
+	OSCFunc.newMatching({|msg|
+		if(q.isNil,{
+			q = Synth(\noiser);
+		},{ q.free; }
+		);
+	},"/toggle/noiser");
+	OSCFunc.newMatching({|msg|
+		if(y.isNil,{
+			y = Synth(\lsiner);
+		},{ y.free; }
+		);
+	},"/toggle/lsiner");
+	OSCFunc.newMatching({|msg|
+		if(z.isNil,{
+			z = Synth(\rsiner);
+		},{ z.free; }
+		);
+	},"/toggle/rsiner");
+	OSCFunc.newMatching({|msg|
+		if(u.isNil,{
+			u = Synth(\blipsaw);
+		},{ u.free; }
+		);
+	},"/toggle/blipsaw");
+	OSCFunc.newMatching({|msg|
+		if(v.isNil,{
+			v = Synth(\hydro4);
+		},{ v.free; }
+		);
+	},"/toggle/hydro4");
+	OSCFunc.newMatching({|msg|
+		if(r.isNil,{
+			r = Synth(\bubbles);
+		},{ r.free; }
+		);
+	},"/toggle/bubbles");
+	
 };
 
-x = nil;
-q = nil;
-y = nil;
-z = nil;
-u = nil;
-v = nil;
-r = nil;
 /*
 x = Synth(\pinknoiser);
 q = Synth(\noiser);
@@ -192,46 +244,4 @@ r = Synth(\bubbles);
 //if(x.isNil,{"Nil".postln},{"N".postln})
 //x,q,y,z,u,v,r
 
-OSCFunc.newMatching({|msg|
-	if(x.isNil,{
-		x = Synth(\pinknoiser);
-	},{ x.free; }
-	);
-},"/toggle/pinknoiser");
-OSCFunc.newMatching({|msg|
-	if(q.isNil,{
-		q = Synth(\noiser);
-	},{ q.free; }
-	);
-},"/toggle/noiser");
-OSCFunc.newMatching({|msg|
-	if(y.isNil,{
-		y = Synth(\lsiner);
-	},{ y.free; }
-	);
-},"/toggle/lsiner");
-OSCFunc.newMatching({|msg|
-	if(z.isNil,{
-		z = Synth(\rsiner);
-	},{ z.free; }
-	);
-},"/toggle/rsiner");
-OSCFunc.newMatching({|msg|
-	if(u.isNil,{
-		u = Synth(\blipsaw);
-	},{ u.free; }
-	);
-},"/toggle/blipsaw");
-OSCFunc.newMatching({|msg|
-	if(v.isNil,{
-		v = Synth(\hydro4);
-	},{ v.free; }
-	);
-},"/toggle/hydro4");
-OSCFunc.newMatching({|msg|
-	if(r.isNil,{
-		r = Synth(\bubbles);
-	},{ r.free; }
-	);
-},"/toggle/bubbles");
 	
