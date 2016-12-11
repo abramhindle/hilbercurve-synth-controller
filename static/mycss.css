@@ -5,4 +5,5 @@ circle {
 body {
     background: url('background.jpg');
     background-color: black;
+    overflow: hidden;
 }
