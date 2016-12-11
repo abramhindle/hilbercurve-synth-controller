@@ -234,6 +234,18 @@ s.waitForBoot {
 		},{ r.free; r = nil;}
 		);
 	},"/toggle/bubbles");
+	OSCFunc.newMatching({|msg|
+		[x,q,y,z,u,v,r].do {|i|
+			if(i.isNil,{},{i.free;});
+		};
+		x = nil;
+		q = nil;
+		y = nil;
+		z = nil;
+		u = nil;
+		v = nil;
+		r = nil;
+	},"/toggle/none");
 	
 };
 
